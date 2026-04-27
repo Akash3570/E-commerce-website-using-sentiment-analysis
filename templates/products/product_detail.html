@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Product Detail Section -->
+<div class="product-detail-container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'products:product_list' %}" class="text-decoration-none"><i class="bi bi-house-door"></i> Home</a></li>
+            <li class="breadcrumb-item active">Product Details</li>
+        </ol>
+    </nav>
+
+    <div class="row g-5">
+        <!-- Left: Product Image -->
+        <div class="col-lg-5 col-md-6">
+            <div class="product-detail-image-wrapper">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" class="product-detail-image img-fluid rounded-3" alt="{{ product.name }}" />
+                {% else %}
+                <div class="bg-light rounded-3 d-flex align-items-center justify-content-center" style="height: 500px;">
+                    <i class="bi bi-image" style="font-size: 3rem; color: #ddd;"></i>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Image Gallery Placeholder -->
+            <div class="image-gallery mt-3 d-flex gap-2">
+                {% if product.image %}
+                <div class="gallery-thumb">
+                    <img src="{{ product.image.url }}" alt="Thumb" class="rounded-2">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right: Product Info -->
+        <div class="col-lg-7 col-md-6">
+            <!-- Breadcrumb -->
+            <div class="product-category mb-3">
+                <span class="badge bg-light text-dark"><i class="bi bi-tag"></i> Electronics</span>
+                <span class="badge bg-light text-dark"><i class="bi bi-star"></i> Best Seller</span>
+            </div>
+
+            <!-- Title -->
+            <h1 class="product-detail-title mb-3">{{ product.name }}</h1>
+
+            <!-- Rating -->
+            <div class="product-rating-section mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stars">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star text-warning"></i>
+                    </div>
+                    <span class="text-muted">(128 reviews)</span>
+                </div>
+                <p class="small text-success mt-2"><i class="bi bi-check-circle"></i> Highly Rated Product</p>
+            </div>
+
+            <!-- Price Section -->
+            <div class="price-section mb-4 p-3 bg-light rounded-3">
+                <div class="d-flex align-items-baseline gap-3">
+                    <span class="product-price-large">${{ product.price }}</span>
+                    <span class="text-muted"><s>${{ product.price|add:10 }}</s></span>
+                    <span class="badge bg-danger"><i class="bi bi-lightning-charge"></i> Sale</span>
+                </div>
+                <p class="small text-success mt-2"><i class="bi bi-truck"></i> Free delivery on orders above $50</p>
+            </div>
+
+            <!-- Description -->
+            <div class="description-section mb-4">
+                <h5 class="mb-3">Product Description</h5>
+                <p class="text-muted">{{ product.description }}</p>
+            </div>
+
+            <!-- Sentiment Analysis Badge -->
+            <div class="sentiment-section mb-4">
+                <h5 class="mb-3">Customer Sentiment</h5>
+                <div class="sentiment-badge-container">
+                    <div class="sentiment-badge positive">
+                        <i class="bi bi-hand-thumbs-up"></i>
+                        <span>Positive Reviews: {{ sentiment_summary.Positive }}%</span>
+                    </div>
+                    <div class="sentiment-badge neutral">
+                        <i class="bi bi-dash-circle"></i>
+                        <span>Neutral Reviews: {{ sentiment_summary.Neutral }}%</span>
+                    </div>
+                    <div class="sentiment-badge negative">
+                        <i class="bi bi-hand-thumbs-down"></i>
+                        <span>Negative Reviews: {{ sentiment_summary.Negative }}%</span>
+                    </div>
+                </div>
+                {% if total_reviews > 0 %}
+                <p class="small text-muted mt-2">Based on {{ total_reviews }} review{{ total_reviews|pluralize }}.</p>
+                {% else %}
+                <p class="small text-muted mt-2">No reviews yet. Sentiment will appear here once customers submit reviews.</p>
+                {% endif %}
+            </div>
+
+            <!-- Add to Cart -->
+            <div class="action-section mb-4">
+                <div class="d-flex gap-3">
+                    <button class="btn btn-primary btn-lg flex-grow-1">
+                        <i class="bi bi-bag-plus"></i> Add to Cart
+                    </button>
+                    <button class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-heart"></i> Wishlist
+                    </button>
+                </div>
+                <div class="mt-3 small text-muted">
+                    <p><i class="bi bi-shield-check"></i> 100% Authentic & Guaranteed</p>
+                    <p><i class="bi bi-arrow-repeat"></i> 30 Days Return Policy</p>
+                </div>
+            </div>
+
+            <!-- Key Features -->
+            <div class="features-section">
+                <h5 class="mb-3">Key Features</h5>
+                <ul class="features-list">
+                    <li><i class="bi bi-check-circle text-success"></i> High Quality Material</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Durable & Long Lasting</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Best Price Guarantee</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Certified & Tested</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reviews Section -->
+<section class="reviews-section mt-5 pt-5 border-top">
+    <div class="row g-4">
+        <!-- Reviews List -->
+        <div class="col-lg-8">
+            <h3 class="mb-4"><i class="bi bi-chat-left-quote"></i> Customer Reviews</h3>
+            
+            {% if reviews %}
+                {% for review in reviews %}
+                <div class="review-card mb-3">
+                    <div class="review-header d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h6 class="mb-1"><i class="bi bi-person-circle"></i> {{ review.user.username }}</h6>
+                            <div class="review-rating">
+                                {% for i in "12345" %}
+                                    {% if i|add:0 <= review.rating %}
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                    {% else %}
+                                        <i class="bi bi-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="small text-muted ms-2">{{ review.rating|default:0 }} stars</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Sentiment Badge -->
+                        {% if review.sentiment %}
+                            {% if review.sentiment == 'Positive' %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-hand-thumbs-up"></i> {{ review.sentiment }}
+                                </span>
+                            {% elif review.sentiment == 'Neutral' %}
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-dash-circle"></i> {{ review.sentiment }}
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-hand-thumbs-down"></i> {{ review.sentiment }}
+                                </span>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                    
+                    <p class="review-text">{{ review.review_text }}</p>
+                    <div class="review-footer small text-muted">
+                        <span><i class="bi bi-calendar"></i> Reviewed on {{ review.created_at|date:'M d, Y' }}</span>
+                        <button class="btn btn-sm btn-link ms-3"><i class="bi bi-hand-thumbs-up"></i> Helpful (5)</button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No reviews yet. Be the first to review this product!
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Add Review Form -->
+        <div class="col-lg-4">
+            {% if user.is_authenticated %}
+            <div class="review-form-card">
+                <h5 class="mb-3">Share Your Review</h5>
+                <form method="post" novalidate class="review-form">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label">Your Review</label>
+                        {{ form.review_text }}
+                        <div class="form-text text-muted mt-2">
+                            Rating and sentiment are predicted automatically using the trained BERT model.
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-send"></i> Submit Review
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i>
+                <p class="mb-0">Please <a href="{% url 'accounts:login' %}" class="alert-link">login</a> to add a review.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Recommendations Section -->
+<section class="recommendations-section mt-5 pt-5 border-top">
+    <div class="section-header mb-4">
+        <h3 class="section-title">
+            <i class="bi bi-eye"></i> Customers Also Viewed
+        </h3>
+        <p class="text-muted">Products similar to what you're viewing</p>
+    </div>
+
+    {% if recommended_products %}
+    <div class="row g-4">
+        {% for prod in recommended_products %}
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="product-card h-100">
+                {% if prod.image %}
+                <div class="product-image-wrapper">
+                    <img src="{{ prod.image.url }}" class="product-image" alt="{{ prod.name }}" />
+                    <button class="wishlist-btn">
+                        <i class="bi bi-heart"></i>
+                    </button>
+                </div>
+                {% endif %}
+                <div class="product-body">
+                    <h6 class="product-name">{{ prod.name }}</h6>
+                    
+                    <!-- Category Badge -->
+                    <div class="mb-2">
+                        <span class="badge bg-info text-white" style="font-size: 0.75rem;">
+                            {{ prod.get_category_display }}
+                        </span>
+                    </div>
+                    
+                    <!-- Rating -->
+                    <div class="product-rating mb-2">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star text-warning"></i>
+                        <span class="small text-muted">(24)</span>
+                    </div>
+
+                    <!-- Price -->
+                    <p class="product-price">${{ prod.price }}</p>
+
+                    <!-- View Button -->
+                    <a href="{% url 'products:product_detail' prod.pk %}" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-eye"></i> View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> No recommendations found at the moment.
+    </div>
+    {% endif %}
+</section>
+
+{% endblock %}

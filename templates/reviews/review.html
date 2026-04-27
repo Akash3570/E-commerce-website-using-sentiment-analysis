@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}AI Review Analysis{% endblock %}
+
+{% block content %}
+<section class="py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <h1 class="h2 fw-bold text-primary mb-3">AI Review Analysis</h1>
+                    <p class="text-muted mb-4">
+                        Enter a product URL or product name, or pick a product card below to view its sentiment instantly.
+                    </p>
+
+                    <form method="get" action="" class="mb-4">
+                        <div class="input-group input-group-lg">
+                            <input
+                                type="text"
+                                name="query"
+                                class="form-control"
+                                placeholder="Enter product URL or product name"
+                                aria-label="Product URL or product name"
+                                value="{{ query }}"
+                            >
+                            <button type="submit" class="btn btn-primary">
+                                Analyze
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="border rounded-3 bg-light p-4 min-vh-25">
+                        <h2 class="h5 mb-3">Result</h2>
+                        {% if analysis %}
+                        <p class="mb-2"><strong>Summary:</strong> {{ analysis.result }}</p>
+                        <p class="mb-1">Total Matched Reviews: {{ analysis.total_reviews|default:0 }}</p>
+                        <p class="mb-1">Positive: {{ analysis.pos }}</p>
+                        <p class="mb-1">Negative: {{ analysis.neg }}</p>
+                        <p class="mb-3">Neutral: {{ analysis.neu }}</p>
+
+                        {% if analysis.reviews %}
+                        <div class="mt-3">
+                            <p class="small text-muted mb-3">Showing first 10 reviews on the page.</p>
+                            {% for review in analysis.reviews|slice:":10" %}
+                            <div class="bg-white border rounded-3 p-3 mb-3">
+                                <p class="fw-semibold mb-1">{{ review.product_name }}</p>
+                                <p class="text-muted small mb-2">
+                                    Sentiment: {{ review.sentiment }}{% if review.rating %} | Rating: {{ review.rating }}{% endif %}
+                                </p>
+                                <p class="mb-0">{{ review.text|truncatechars:220 }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <p class="text-muted mb-0">Analysis results will appear here.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="pb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <h2 class="h3 fw-bold mb-1">Amazon Product Explorer</h2>
+            <p class="text-muted mb-0">Click a card action to run AI review sentiment for that product.</p>
+        </div>
+    </div>
+
+    <div class="row g-4" id="product-grid">
+        {% for product in products %}
+        <div class="col-xl-3 col-lg-4 col-md-6 product-card-col" data-has-image="{% if product.img_link %}true{% else %}false{% endif %}">
+            <div class="card border-0 shadow-sm h-100">
+                {% if product.img_link %}
+                <img
+                    src="{{ product.img_link }}"
+                    class="card-img-top p-3"
+                    alt="{{ product.product_name }}"
+                    style="height: 220px; object-fit: contain;"
+                    onerror="this.onerror=null; this.closest('.product-card-col').dataset.hasImage='false'; this.parentElement.querySelector('.image-fallback').classList.remove('d-none'); this.remove(); window.reorderProductCards && window.reorderProductCards();"
+                >
+                {% endif %}
+                <div class="image-fallback {% if product.img_link %}d-none{% endif %} d-flex flex-column align-items-center justify-content-center bg-light text-muted" style="height: 220px;">
+                    <i class="bi bi-image fs-1 mb-2"></i>
+                    <span class="small">Image unavailable</span>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <span class="badge bg-light text-dark align-self-start mb-2">{{ product.product_id|default:"Amazon Product" }}</span>
+                    <h3 class="h6 fw-semibold mb-2">{{ product.product_name }}</h3>
+                    <p class="text-muted small mb-2">{{ product.category|truncatechars:70 }}</p>
+                    <p class="small mb-2">
+                        {% if product.discounted_price %}
+                        <span class="fw-bold text-primary">{{ product.discounted_price }}</span>
+                        {% endif %}
+                        {% if product.actual_price %}
+                        <span class="text-muted text-decoration-line-through ms-1">{{ product.actual_price }}</span>
+                        {% endif %}
+                    </p>
+                    <p class="small text-muted mb-3">
+                        Rating: {{ product.rating|default:"N/A" }}
+                        {% if product.rating_count %}| Reviews: {{ product.rating_count }}{% endif %}
+                    </p>
+                    <div class="mt-auto d-grid gap-2">
+                        <a href="?query={{ product.product_link|urlencode }}{% if search %}&search={{ search|urlencode }}{% endif %}" class="btn btn-primary btn-sm">
+                            Analyze Sentiment
+                        </a>
+                        <a href="{{ product.product_link }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm">
+                            Open Amazon Link
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                No products found in `amazon.csv` for this search.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if page_obj %}
+    <div class="d-flex justify-content-center align-items-center gap-3 mt-5 flex-wrap">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search|urlencode }}{% endif %}" class="btn btn-outline-primary">
+            Previous
+        </a>
+        {% endif %}
+
+        <span class="text-muted">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search|urlencode }}{% endif %}" class="btn btn-primary">
+            Next
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+
+<script>
+    window.reorderProductCards = function reorderProductCards() {
+        const grid = document.getElementById('product-grid');
+        if (!grid) {
+            return;
+        }
+
+        const cards = Array.from(grid.querySelectorAll('.product-card-col'));
+        cards
+            .sort((a, b) => {
+                const aHasImage = a.dataset.hasImage === 'true' ? 0 : 1;
+                const bHasImage = b.dataset.hasImage === 'true' ? 0 : 1;
+                return aHasImage - bHasImage;
+            })
+            .forEach((card) => grid.appendChild(card));
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        window.reorderProductCards();
+    });
+</script>
+{% endblock %}

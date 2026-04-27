@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Hero Banner -->
+<section class="hero-banner mb-5 rounded-3 overflow-hidden" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 80px 40px; color: white; text-align: center;">
+    <div class="hero-content">
+        <h1 class="display-3 fw-bold mb-3">Welcome to AI Shop</h1>
+        <p class="lead mb-4">Smart Shopping with AI-Powered Product Reviews</p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="#trending" class="btn btn-light btn-lg">
+                <i class="bi bi-lightning-fill"></i> Explore Trending
+            </a>
+            <a href="#all-products" class="btn btn-outline-light btn-lg">
+                <i class="bi bi-grid-3x3-gap"></i> All Products
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="categories-section mb-5">
+    <h3 class="section-title mb-4"><i class="bi bi-tag"></i> Shop by Category</h3>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="category-card h-100">
+                <div class="category-icon"><i class="bi bi-shoe"></i></div>
+                <h5>Shoes</h5>
+                <p class="text-muted">Comfortable & stylish footwear</p>
+                <a href="?category=shoes" class="btn btn-sm btn-outline-primary">Browse →</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="category-card h-100">
+                <div class="category-icon"><i class="bi bi-bag"></i></div>
+                <h5>Clothing</h5>
+                <p class="text-muted">Latest fashion trends</p>
+                <a href="?category=clothing" class="btn btn-sm btn-outline-primary">Browse →</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="category-card h-100">
+                <div class="category-icon"><i class="bi bi-laptop"></i></div>
+                <h5>Electronics</h5>
+                <p class="text-muted">Latest gadgets & tech</p>
+                <a href="?category=electronics" class="btn btn-sm btn-outline-primary">Browse →</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trending Products Section -->
+<section class="trending-section mb-5" id="trending">
+    <div class="section-header mb-4">
+        <h3 class="section-title"><i class="bi bi-fire"></i> Trending Products</h3>
+        <p class="text-muted">Most popular items right now</p>
+    </div>
+    
+    <div class="row g-4">
+        {% for product in trending %}
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="product-card h-100">
+                {% if product.image %}
+                <div class="product-image-wrapper">
+                    <img src="{{ product.image.url }}" class="product-image" alt="{{ product.name }}" />
+                    <div class="product-badge">
+                        <span class="badge bg-danger">
+                            <i class="bi bi-fire"></i> Trending
+                        </span>
+                    </div>
+                </div>
+                {% endif %}
+                <div class="product-body">
+                    <h6 class="product-name">{{ product.name }}</h6>
+                    <div class="product-rating mb-2">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star text-warning"></i>
+                        <span class="small text-muted">(48)</span>
+                    </div>
+                    <p class="product-price">${{ product.price }}</p>
+                    <a href="{% url 'products:product_detail' product.pk %}" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-eye"></i> View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-center text-muted">No trending products yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- All Products Section -->
+<section class="products-section" id="all-products">
+    <div class="section-header mb-4">
+        <h3 class="section-title"><i class="bi bi-grid-3x3-gap"></i> All Products</h3>
+        <div class="products-controls">
+            <form method="get" action="{% url 'products:product_list' %}" class="d-flex gap-2">
+                <input type="search" name="q" class="form-control form-control-sm" placeholder="Search..." value="{{ query }}">
+                <button type="submit" class="btn btn-outline-primary btn-sm">Search</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        {% for product in products %}
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="product-card h-100">
+                {% if product.image %}
+                <div class="product-image-wrapper">
+                    <img src="{{ product.image.url }}" class="product-image" alt="{{ product.name }}" />
+                    <button class="wishlist-btn">
+                        <i class="bi bi-heart"></i>
+                    </button>
+                </div>
+                {% endif %}
+                <div class="product-body">
+                    <h6 class="product-name">{{ product.name }}</h6>
+                    <div class="product-rating mb-2">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-half text-warning"></i>
+                        <span class="small text-muted">(32)</span>
+                    </div>
+                    <p class="product-price">${{ product.price }}</p>
+                    <a href="{% url 'products:product_detail' product.pk %}" class="btn btn-outline-primary btn-sm w-100">
+                        <i class="bi bi-eye"></i> View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle"></i> No products found. Try a different search.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Recommended Section (AI Based) -->
+<section class="recommended-section mt-5 pt-5">
+    <div class="section-header mb-4">
+        <h3 class="section-title"><i class="bi bi-lightbulb"></i> AI Recommended for You</h3>
+        <p class="text-muted">Based on trending products and ratings</p>
+    </div>
+    
+    <div class="row g-4">
+        {% for product in trending|slice:":4" %}
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="product-card h-100">
+                {% if product.image %}
+                <div class="product-image-wrapper">
+                    <img src="{{ product.image.url }}" class="product-image" alt="{{ product.name }}" />
+                    <div class="product-badge">
+                        <span class="badge bg-success">
+                            <i class="bi bi-check-circle"></i> Recommended
+                        </span>
+                    </div>
+                </div>
+                {% endif %}
+                <div class="product-body">
+                    <h6 class="product-name">{{ product.name }}</h6>
+                    <div class="product-rating mb-2">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <span class="small text-muted">(95)</span>
+                    </div>
+                    <p class="product-price">${{ product.price }}</p>
+                    <a href="{% url 'products:product_detail' product.pk %}" class="btn btn-success btn-sm w-100">
+                        <i class="bi bi-check-lg"></i> Add to Cart
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}
